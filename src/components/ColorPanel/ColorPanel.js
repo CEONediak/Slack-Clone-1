@@ -1,26 +1,19 @@
 import React from "react";
-import {connect} from 'react-redux'
-import {setColors} from '../../actions'
 import firebase from "../../firebase";
-import {
-  Sidebar,
-  Menu,
-  Divider,
-  Button,
-  Modal,
-  Icon,
-  Label,
-  Segment
-} from "semantic-ui-react";
+import { connect } from "react-redux";
+import { setColors } from "../../actions";
+// prettier-ignore
+import { Sidebar, Menu, Divider, Button, Modal, Icon, Label, Segment } from "semantic-ui-react";
 import { SliderPicker } from "react-color";
+
 class ColorPanel extends React.Component {
   state = {
-    userColors: "",
     modal: false,
     primary: "",
     secondary: "",
+    user: this.props.currentUser,
     usersRef: firebase.database().ref("users"),
-    user: this.props.currentUser
+    userColors: []
   };
 
   componentDidMount() {
@@ -29,14 +22,13 @@ class ColorPanel extends React.Component {
     }
   }
 
-  componentWillUnmount(){
-    this.removeListener()
+  componentWillUnmount() {
+    this.removeListener();
   }
 
-  removeListener=()=>{
-    this.state.usersRef.child(`${this.state.user.uid}/colors`)
-      .off()
-  }
+  removeListener = () => {
+    this.state.usersRef.child(`${this.state.user.uid}/colors`).off();
+  };
 
   addListener = userId => {
     let userColors = [];
@@ -46,21 +38,11 @@ class ColorPanel extends React.Component {
     });
   };
 
-  openModal = () => {
-    this.setState({
-      modal: true
-    });
-  };
-  closeModal = () => {
-    this.setState({
-      modal: false
-    });
-  };
-
   handleChangePrimary = color => this.setState({ primary: color.hex });
-  handleChangeSecendary = color => this.setState({ secondary: color.hex });
 
-  handleSave = () => {
+  handleChangeSecondary = color => this.setState({ secondary: color.hex });
+
+  handleSaveColors = () => {
     if (this.state.primary && this.state.secondary) {
       this.saveColors(this.state.primary, this.state.secondary);
     }
@@ -75,76 +57,77 @@ class ColorPanel extends React.Component {
         secondary
       })
       .then(() => {
-        console.log("color add");
+        console.log("Colors added");
         this.closeModal();
       })
       .catch(err => console.error(err));
   };
 
-  displayUserColors = colors => {
-   return colors.length > 0 &&
-      colors.map((color, i) => {
-        return (
-          <React.Fragment key={i}>
-            <Divider />
-            <div className='color__container' onClick={()=>this.props.setColors(color.primary,color.secondary)}>
-              <div
-                className='color__square'
-                style={{ background: color.primary }}
-              >
-                <div
-                  className='color__overlay'
-                  style={{ background: color.secondary }}
-                ></div>
-              </div>
-            </div>
-          </React.Fragment>
-        );
-      });
-  };
+  displayUserColors = colors =>
+    colors.length > 0 &&
+    colors.map((color, i) => (
+      <React.Fragment key={i}>
+        <Divider />
+        <div
+          className="color__container"
+          onClick={() => this.props.setColors(color.primary, color.secondary)}
+        >
+          <div className="color__square" style={{ background: color.primary }}>
+            <div
+              className="color__overlay"
+              style={{ background: color.secondary }}
+            />
+          </div>
+        </div>
+      </React.Fragment>
+    ));
+
+  openModal = () => this.setState({ modal: true });
+
+  closeModal = () => this.setState({ modal: false });
 
   render() {
     const { modal, primary, secondary, userColors } = this.state;
+
     return (
       <Sidebar
         as={Menu}
-        icon='labeled'
+        icon="labeled"
         inverted
         vertical
         visible
-        width='very thin'
+        width="very thin"
       >
         <Divider />
-        <Button icon='add' size='small' color='blue' onClick={this.openModal} />
+        <Button icon="add" size="small" color="blue" onClick={this.openModal} />
         {this.displayUserColors(userColors)}
-        {/* Color Picker Model */}
 
-        <Modal basic open={modal} onClose={this.onClose}>
-          <Modal.Header>Choose App Color</Modal.Header>
+        {/* Color Picker Modal */}
+        <Modal basic open={modal} onClose={this.closeModal}>
+          <Modal.Header>Choose App Colors</Modal.Header>
           <Modal.Content>
             <Segment inverted>
-              <Label content='Primary Color' />
+              <Label content="Primary Color" />
               <SliderPicker
                 color={primary}
                 onChange={this.handleChangePrimary}
               />
             </Segment>
+
             <Segment inverted>
-              <Label content='Secondary Color' />
+              <Label content="Secondary Color" />
               <SliderPicker
                 color={secondary}
-                onChange={this.handleChangeSecendary}
+                onChange={this.handleChangeSecondary}
               />
             </Segment>
           </Modal.Content>
           <Modal.Actions>
-            <Button color='green' inverted onClick={this.handleSave}>
-              <Icon name='checkmark' />
-              Save Colors
+            <Button color="green" inverted onClick={this.handleSaveColors}>
+              <Icon name="checkmark" /> Save Colors
             </Button>
-            <Button color='red' inverted onClick={this.closeModal}>
-              <Icon name='remove' />
-              Cancel
+            <Button color="red" inverted onClick={this.closeModal}>
+              <Icon name="remove" /> Cancel
             </Button>
           </Modal.Actions>
         </Modal>
@@ -153,4 +136,7 @@ class ColorPanel extends React.Component {
   }
 }
 
-export default connect(null,{setColors})(ColorPanel);
+export default connect(
+  null,
+  { setColors }
+)(ColorPanel);
