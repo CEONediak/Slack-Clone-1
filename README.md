@@ -4,5 +4,5 @@ Cloning Slack Using:
 - React
 + Redux 
 ! Firebase
-# text in gray
+
 ```
